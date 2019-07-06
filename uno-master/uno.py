@@ -2,7 +2,7 @@ import random
 
 colors = ['G','Y','B','R']
 nums = [num for num in range(0,10,1)]
-spec =  ['SKIP','DRAW2']
+spec =  ['SKIP','DRAW2','REVERSE']
 wild = ['WILD','DRAW4']
 
 def cardType(type,card):
@@ -112,7 +112,6 @@ while not win:
 		turn_count += 4
 
 	elif turn_count == 1:
-
 		print(handMessage)
 		yourMove = input('Your move: ').upper()
 		moveTypes = allTypes(yourMove)
@@ -123,6 +122,7 @@ while not win:
 			del deck[0]
 			if not reverse:
 				turn_count += 1
+			else: turn_count += 3
 			continue
 		else:
 			validMove = False
@@ -139,22 +139,34 @@ while not win:
 			if validMove == True:
 				playHand.remove(yourMove.upper())
 				inPlay = yourMove.upper()
+				if not reverse:
+					nextPlayer = 'CPU1'
+					nextHand = hand1
+				else:
+					nextPlayer = 'CPU3'
+					nextHand = hand3
 				if len(playHand) == 0:
 					print("You win!")
 					win = True
 					break
 				elif cardType('spec',inPlay) == 'SKIP':
-					print('CPU1 is skipped!')
+					print('{} is skipped!'.format(nextPlayer))
 					turn_count += 2
 					continue
 				elif cardType('spec',inPlay) == 'DRAW2':
-					print('CPU1 draws two!')
-					hand1.append(deck[0])
+					print('{} draws two!'.format(nextPlayer))
+					nextHand.append(deck[0])
 					del deck[0]
-					hand1.append(deck[0])
+					nextHand.append(deck[0])
 					del deck[0]
 					turn_count += 2
 					continue
+				elif cardType('spec',inPlay) == 'REVERSE':
+					print('Play is reversed!')
+					reverse = not reverse
+					if not reverse:
+						turn_count += 1
+					else: turn_count -= 1
 				elif cardType('wild',inPlay):
 					drawFour = False
 					if cardType('wild',inPlay) == 'DRAW4':
@@ -163,26 +175,29 @@ while not win:
 					print('The color is now {}'.format(wildColor))
 					inPlay = '{}^'.format(wildColor)
 					if drawFour:
-						print('CPU1 draws 4!')
-						hand1.append(deck[0])
+						print('{} draws 4!'.format(nextPlayer))
+						nextHand.append(deck[0])
 						del deck[0]
-						hand1.append(deck[0])
+						nextHand.append(deck[0])
 						del deck[0]
-						hand1.append(deck[0])
+						nextHand.append(deck[0])
 						del deck[0]
-						hand1.append(deck[0])
+						nextHand.append(deck[0])
 						del deck[0]
 						ipMessage = 'In play: ' + str(inPlay)
-						print(ipMessage)
 						turn_count += 2
 						continue
 					else: 
 						ipMessage = 'In play: ' + str(inPlay)
 						print(ipMessage)
-						turn_count += 1
+						if not reverse:
+							turn_count += 1
+						else: turn_count -= 1
 						continue
 				else:
-					turn_count += 1
+					if not reverse:
+						turn_count += 1
+					else: turn_count -= 1
 					continue
 			print(ipMessage)
 
@@ -192,20 +207,32 @@ while not win:
 		if turn_count == 2:
 			activePlayer = 'CPU1'
 			activeHand = hand1
-			nextPlayer = 'CPU2'
-			nextHand = hand2
+			if not reverse:
+				nextPlayer = 'CPU2'
+				nextHand = hand2
+			else:
+				nextPlayer = 'Player'
+				nextHand = playHand
 
 		elif turn_count == 3:
 			activePlayer = 'CPU2'
 			activeHand = hand2
-			nextPlayer = 'CPU3'
-			nextHand = hand3
+			if not reverse:
+				nextPlayer = 'CPU3'
+				nextHand = hand3
+			else:
+				nextPlayer = 'CPU1'
+				nextHand = hand1
 
 		elif turn_count == 4:
 			activePlayer = 'CPU3'
 			activeHand = hand3
-			nextPlayer = 'Player'
-			nextHand = playHand
+			if not reverse:
+				nextPlayer = 'Player'
+				nextHand = playHand
+			else:
+				nextPlayer = 'CPU2'
+				nextHand = hand2
 
 		for card in activeHand:
 			if isMatch(card,inPlay):
@@ -225,6 +252,12 @@ while not win:
 					turn_count += 2
 					print(ipMessage)
 					break
+				elif cardType('spec',inPlay) == 'REVERSE':
+					print('Play is reversed!')
+					reverse = not reverse
+					if not reverse:
+						turn_count += 1
+					else: turn_count -= 1
 				elif cardType('wild',inPlay):
 					drawFourCPU = False
 					if cardType('wild',inPlay) == 'DRAW4':
@@ -245,7 +278,9 @@ while not win:
 						turn_count += 2
 						break
 					else: 
-						turn_count += 1
+						if not reverse:
+							turn_count += 1
+						else: turn_count -= 1
 						break
 				print('In play: ' + str(inPlay))
 				if len(activeHand) == 0:
@@ -258,13 +293,17 @@ while not win:
 					turn_count += 1
 					break
 				else: 
-					turn_count += 1
+					if not reverse:
+						turn_count += 1
+					else: turn_count -= 1
 					break
 		else:
 			print('{} draws a card.'.format(activePlayer))
 			activeHand.append(deck[0])
 			del deck[0]
-			turn_count += 1
+			if not reverse:
+				turn_count += 1
+			else: turn_count -= 1
 			print('In play: ' + str(inPlay))
 			continue
 
